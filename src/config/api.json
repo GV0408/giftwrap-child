@@ -1,0 +1,14 @@
+{
+  "development": {
+    "url": "https://9688905edada.ngrok.io/api/v1/",
+    "urlVersion": "v1"
+  },
+  "production": {
+    "url": "https://api.giftcard.99minds.io/api/v1/",
+    "urlVersion": "v1"
+  },
+  "staging": {
+    "url": "https://api.demo.giftcard.99minds.io/api/v1/",
+    "urlVersion": "v1"
+  }
+}
