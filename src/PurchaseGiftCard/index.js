@@ -2,22 +2,19 @@ import React, { Component } from 'react';
 import { Space, Radio, Button,Col, Row, Input, message, Checkbox, Tag, InputNumber, Spin, Tabs } from 'antd';
 import 'antd/dist/antd.css';
 import '@ant-design/compatible/assets/index.css';
-import { CloseOutlined, Loading3QuartersOutlined } from '@ant-design/icons';
+import { CloseOutlined, Loading3QuartersOutlined, LeftCircleOutlined, RightCircleOutlined   } from '@ant-design/icons';
 import { Form } from '@ant-design/compatible';
 import * as GiftcardAPI from '../api/Giftcard';
 import { RESPONSE_CODES } from '../constants/API';
-import { isEmpty } from 'lodash';
+import { isEmpty, range  } from 'lodash';
 import ReactDOM from "react-dom";
 import MyWidget from '../widget';
 import './style.css';
-// import Carousel, { Dots } from '@brainhubeu/react-carousel';
-// import '@brainhubeu/react-carousel/lib/style.css';
+import ItemsCarousel from 'react-items-carousel';
+import Carousels from '@brainhubeu/react-carousel';
+import '@brainhubeu/react-carousel/lib/style.css';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from 'react-responsive-carousel';
-
-
-
-
 
 let MyWidget1 = MyWidget.driver('react',{
    React: React,
@@ -52,55 +49,72 @@ class PurchaseGiftCard extends Component {
 	      discounted_amount: 0,
 	      value: 0,
 	      product_image: "",
+	      children: [],
+	      activeItemIndex: 0,
+	      images: ['giftcard.png', 'gc1.png', 'gc2.png', 'gc3.png', 'gc4.png']
 	    }
-
 	}
-	  onChange = value => {
-    this.setState({
-      value: value,
-    });
-  };
 
+	onChange = value => {
+    	this.setState({
+      		value: value,
+    	});
+  	};
 
+	componentDidMount() {
+		setTimeout(() => {
+	    	this.setState({
+	      	  children: this.createChildren(this.state.images.length),
+	      	})
+	    }, 100);
 
- componentDidMount() {
-    if (window.xprops) {
-    	let imgs = window.xprops.image_url;
-      this.setState({
-	       product_image: imgs ? imgs : "https://via.placeholder.com/150"
-      });
-    }
-  }
+	    if (window.xprops) {
+	    	let imgs = window.xprops.image_url;
+	    	  this.setState({
+		    	product_image: imgs ? imgs : "https://via.placeholder.com/150"
+	      	});
+	    }
+	}
 
-  handleSubmit = (e) => {
-    e.preventDefault();
-    this.props.form.validateFields((error, values) => {
-      if (!error) {
-        let options = {
-          sender_name: values.name,
-          sender_email: values.email,
-          recipient_name: values.recipient_name,
-          recipient_email: values.recipient_email,
-          message: values.message,
-          imgUrl: this.state.product_image
-        }
+  	createChildren = n => range(n).map(i => <div key={i} style={{ height: 100, textAlign: "center"}}><img style={{ height: 100 }} src={require('../assets/img/' + this.state.images[i])} /></div>);
 
-        GiftcardAPI.sendEmail(options)
-        .then(result => {
-          if (result.code === RESPONSE_CODES.SUCCESS) {
-            this.setState({ balance: result.data.balance });
-          } else {
-            message.error(result.message);
-          }
-        })
-        .catch((e) => {
-          console.log(e)
-        });
-      }
-    })
+  	changeActiveItem = (activeItemIndex) => this.setState({ activeItemIndex });
 
-  }
+	handleSubmit = (e) => {
+		e.preventDefault();
+	    this.props.form.validateFields((error, values) => {
+	      if (!error) {
+	        let options = {
+	          sender_name: values.name,
+	          sender_email: values.email,
+	          recipient_name: values.recipient_name,
+	          recipient_email: values.recipient_email,
+	          message: values.message,
+	          imgUrl: this.state.product_image
+	        }
+
+	        GiftcardAPI.sendEmail(options)
+	        .then(result => {
+	          if (result.code === RESPONSE_CODES.SUCCESS) {
+	            this.setState({ balance: result.data.balance });
+	          } else {
+	            message.error(result.message);
+	          }
+	        })
+	        .catch((e) => {
+	          console.log(e)
+	        });
+	      }
+	    })
+	}
+	
 	render() {
+		const {
+	      activeItemIndex,
+	      children,
+	      images
+	    } = this.state;
+	    console.log(activeItemIndex)
 		const { isFieldsTouched, getFieldDecorator, getFieldValue } = this.props.form;
 		const { store } = {
 			app_id: "4dk8uwhtd1qx3h918q81ei5jvjq65yf",
@@ -117,6 +131,7 @@ class PurchaseGiftCard extends Component {
 			store_name: "doboz",
 			store_url: "https://doboz.mybigcommerce.com",
 		};
+	
 		return(
 			<div>
 				<Row gutter={0} justify={'center'} style={{textAlign: "center", marginTop: 10}} >
@@ -133,7 +148,7 @@ class PurchaseGiftCard extends Component {
 						<div>
 						  <div className="box">
 					          <div className="box-body">
-							<img className="img img-example"  src={this.state.product_image} />
+								<img className="img img-example"  src={require('../assets/img/' + images[activeItemIndex])} />
 					            <div className="box-lid">
 					              <div className="box-bowtie"></div>
 					            </div>
@@ -142,23 +157,38 @@ class PurchaseGiftCard extends Component {
 						</div>
 					</Col>
 					<Col xs={24} sm={14} md={14} offset={2}>
-<div className="carousel-wrapper">
-            <Carousel showArrows={false} >
-                <div>
-                    <img src="https://via.placeholder.com/150" />
-                    <p className="legend">Legend 1</p>
-                </div>
-                <div>
-                    <img src="https://via.placeholder.com/150" />
-                    <p className="legend">Legend 2</p>
-                </div>
-                <div>
-                    <img src="https://via.placeholder.com/150" />
-                    <p className="legend">Legend 3</p>
-                </div>
-            </Carousel>
+						<Row gutter={8} type="flex">
+							<Col xs={8} style={{margin: "auto", textAlign: "center"}}>
+								<p>Select your design</p>
+							</Col>
+							<Col xs={15}>
+								<ItemsCarousel
+						        // Placeholder configurations
+						        enablePlaceholder ={false}
 
-</div>
+						        // Carousel configurations
+						        numberOfCards={1}
+						        gutter={12}
+						        showSlither={true}
+						        firstAndLastGutter={true}
+						        freeScrolling={false}
+
+						        // Active item configurations
+						        requestToChangeActive={this.changeActiveItem}
+						        activeItemIndex={activeItemIndex}
+						        activePosition={'center'}
+
+						        chevronWidth={24}
+						        rightChevron={<RightCircleOutlined />}
+						        leftChevron={<LeftCircleOutlined />}
+						        outsideChevron={true}
+						      >
+						        {children}
+						      </ItemsCarousel>
+							</Col>
+							<Col xs={1}>
+							</Col>
+						</Row>
 						<Form
 			              style={{marginTop: 10}}
 			              layout="vertical"
