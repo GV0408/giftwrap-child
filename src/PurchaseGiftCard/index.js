@@ -1,20 +1,18 @@
 import React, { Component } from 'react';
-import { Space, Radio, Button,Col, Row, Input, message, Checkbox, Tag, InputNumber, Spin, Tabs } from 'antd';
+import { Button,Col, Row, Input, message, Checkbox } from 'antd';
 import 'antd/dist/antd.css';
 import '@ant-design/compatible/assets/index.css';
-import { CloseOutlined, Loading3QuartersOutlined, LeftCircleOutlined, RightCircleOutlined   } from '@ant-design/icons';
+import { LeftCircleOutlined, RightCircleOutlined   } from '@ant-design/icons';
 import { Form } from '@ant-design/compatible';
 import * as GiftcardAPI from '../api/Giftcard';
 import { RESPONSE_CODES } from '../constants/API';
-import { isEmpty, range  } from 'lodash';
+import { range  } from 'lodash';
 import ReactDOM from "react-dom";
 import MyWidget from '../widget';
 import './style.css';
 import ItemsCarousel from 'react-items-carousel';
-import Carousels from '@brainhubeu/react-carousel';
 import '@brainhubeu/react-carousel/lib/style.css';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import { Carousel } from 'react-responsive-carousel';
 
 let MyWidget1 = MyWidget.driver('react',{
    React: React,
@@ -22,9 +20,7 @@ let MyWidget1 = MyWidget.driver('react',{
 })
 
 const FormItem = Form.Item;
-const { TabPane } = Tabs;
 const {TextArea} = Input;
-const value_ranges = [ 10, 15, 20, 25, 50 ]
 
 const fields = {
   name: 'name',
@@ -50,7 +46,7 @@ class PurchaseGiftCard extends Component {
 	      value: 0,
 	      product_image: "",
 	      children: [],
-	      activeItemIndex: 0,
+	      activeItemIndex: -1,
 	      images: ['giftcard.png', 'gc1.png', 'gc2.png', 'gc3.png', 'gc4.png']
 	    }
 	}
@@ -76,9 +72,15 @@ class PurchaseGiftCard extends Component {
 	    }
 	}
 
-  	createChildren = n => range(n).map(i => <div key={i} style={{ height: 100, textAlign: "center"}}><img style={{ height: 100 }} src={require('../assets/img/' + this.state.images[i])} /></div>);
+  	createChildren = n => range(n).map(i => <div key={i} style={{ height: 100, textAlign: "center" , cursor: 'pointer'}}><img alt='' style={{ height: 100 }} src={require('../assets/img/' + this.state.images[i])} onClick={e => this.setActiveItem(i)} /></div>);
 
   	changeActiveItem = (activeItemIndex) => this.setState({ activeItemIndex });
+
+  	setActiveItem = (index) => {
+	    this.setState({
+	      activeItemIndex: index,
+	    });
+  	};
 
 	handleSubmit = (e) => {
 		e.preventDefault();
@@ -114,7 +116,6 @@ class PurchaseGiftCard extends Component {
 	      children,
 	      images
 	    } = this.state;
-	    console.log(activeItemIndex)
 		const { isFieldsTouched, getFieldDecorator, getFieldValue } = this.props.form;
 		const { store } = {
 			app_id: "4dk8uwhtd1qx3h918q81ei5jvjq65yf",
@@ -148,7 +149,7 @@ class PurchaseGiftCard extends Component {
 						<div>
 						  <div className="box">
 					          <div className="box-body">
-								<img className="img img-example"  src={require('../assets/img/' + images[activeItemIndex])} />
+								<img alt='' className="img img-example"  src={this.state.activeItemIndex !== -1 ? require('../assets/img/' + images[activeItemIndex]) : this.state.product_image}s />
 					            <div className="box-lid">
 					              <div className="box-bowtie"></div>
 					            </div>
@@ -167,9 +168,9 @@ class PurchaseGiftCard extends Component {
 						        enablePlaceholder ={false}
 
 						        // Carousel configurations
-						        numberOfCards={1}
+						        numberOfCards={3}
 						        gutter={12}
-						        showSlither={true}
+						        showSlither={false}
 						        firstAndLastGutter={true}
 						        freeScrolling={false}
 
@@ -178,7 +179,7 @@ class PurchaseGiftCard extends Component {
 						        activeItemIndex={activeItemIndex}
 						        activePosition={'center'}
 
-						        chevronWidth={24}
+						        chevronWidth={4}
 						        rightChevron={<RightCircleOutlined />}
 						        leftChevron={<LeftCircleOutlined />}
 						        outsideChevron={true}

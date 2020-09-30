@@ -1,4 +1,3 @@
-
 .img-example{
 	width: 150px;
 }
@@ -52,10 +51,7 @@ body{
 .box-body:hover .img{
   opacity: 1;
   z-index: 0;
-  transform: translateY(-157px);
-
-
-   
+  transform: translateY(-157px);   
 }
 
 .box-body:hover .box-lid {
